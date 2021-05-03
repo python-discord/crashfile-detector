@@ -1,1 +1,1 @@
-# Crasher-file-detector
+# Discord crash file detector

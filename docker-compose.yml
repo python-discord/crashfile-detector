@@ -1,0 +1,16 @@
+version: "3.7"
+
+services:
+
+  crash-detection:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./logs:/app/logs
+      - .:/app:ro
+    tty: true
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8000:80"
