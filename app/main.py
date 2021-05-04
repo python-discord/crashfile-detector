@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 import aiohttp
+from aiohttp.web import HTTPError
 from fastapi import FastAPI, HTTPException
 from fastapi.templating import Jinja2Templates
 from starlette.responses import HTMLResponse
@@ -24,7 +25,7 @@ MAX_LENGTH = 10 * 1024 * 1024  # multiply by 1024 twice to get Bytes
 @app.on_event("startup")
 async def startup() -> None:
     """Create a aiohttp session and setup logging."""
-    app.state.http_session = aiohttp.ClientSession(raise_for_status=True)
+    app.state.http_session = aiohttp.ClientSession()
 
 
 @app.on_event("shutdown")
@@ -49,15 +50,21 @@ def ping() -> models.Pong:
 @app.post("/detectfile", tags=["General Endpoints"], response_model=models.FileInfo)
 async def detect_file(url: models.SuspectUrl) -> models.FileInfo:
     """Stream the file to ffprobe to check if it would crash Discord."""
-    async with app.state.http_session.get(url.url) as resp:
-        try:
-            length = int(resp.headers["Content-Length"])
-        except KeyError:
-            raise HTTPException(status_code=400, detail=models.ErrorMessages.NO_CONTENT_HEADER)
-        except ValueError:
-            raise HTTPException(status_code=400, detail=models.ErrorMessages.NON_INT_CONTENT_HEADER)
-        if length > MAX_LENGTH:
-            raise HTTPException(status_code=413, detail=models.ErrorMessages.CONTENT_TOO_BIG)
+    try:
+        async with app.state.http_session.get(url.url) as resp:
+            headers = resp.headers
+    except HTTPError as e:
+        raise HTTPException(status_code=e.status, detail=models.ErrorMessages.REMOTE_SERVER_ERROR)
+
+    try:
+        length = int(headers["Content-Length"])
+    except KeyError:
+        raise HTTPException(status_code=400, detail=models.ErrorMessages.NO_CONTENT_HEADER)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=models.ErrorMessages.NON_INT_CONTENT_HEADER)
+
+    if length > MAX_LENGTH:
+        raise HTTPException(status_code=413, detail=models.ErrorMessages.CONTENT_TOO_BIG)
 
     proc = await asyncio.create_subprocess_exec(
         "/usr/bin/ffprobe",
@@ -66,10 +73,15 @@ async def detect_file(url: models.SuspectUrl) -> models.FileInfo:
         "-show_entries", "frame=pkt_pts_time,width,height,pix_fmt",
         "-select_streams", "v",
         "-of", "csv=p=0",
-        stdout=asyncio.subprocess.PIPE
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
     )
-
     w, h, fmt = None, None, None
+
+    # Some links may 403 for ffprobe, but not aiohttp
+    # Also deals with errors from ffprobe itself
+    if err := (await proc.stderr.read()).decode():
+        raise HTTPException(status_code=400, detail=err)
 
     scanned_frames = 0
     safe = True
@@ -102,5 +114,5 @@ async def detect_file(url: models.SuspectUrl) -> models.FileInfo:
             "width": w,
             "height": h
         },
-        "format": str(fmt)
+        "format": fmt
     }

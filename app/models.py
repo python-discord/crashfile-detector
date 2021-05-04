@@ -15,6 +15,7 @@ class ErrorMessages(t.NamedTuple):
 
     NO_CONTENT_HEADER = "Remote server didn't return a Content-Length header."
     NON_INT_CONTENT_HEADER = "Remote server returned a non-integer Content-Length header."
+    REMOTE_SERVER_ERROR = "Remote server returned a non-200 response code."
     CONTENT_TOO_BIG = "The remote file was too big to download."
     INVALID_URL = "URL must be a valid url!"
 
