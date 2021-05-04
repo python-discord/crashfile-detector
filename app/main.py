@@ -19,7 +19,6 @@ app = FastAPI(
 templates = Jinja2Templates(directory="app/templates")
 
 MAX_LENGTH = 10 * 1024 * 1024  # multiply by 1024 twice to get Bytes
-CHUNK_SIZE = 8 * 1024
 
 
 @app.on_event("startup")
