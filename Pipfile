@@ -6,7 +6,8 @@ name = "pypi"
 [packages]
 uvicorn = "~=0.13"
 fastapi = "~=0.63"
-requests = "~=2.25"
+aiohttp = "~=3.7"
+jinja2 = "~=2.11"
 
 [dev-packages]
 coverage = "~=5.0"
