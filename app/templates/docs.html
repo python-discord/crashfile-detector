@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crash Detector API Documentation</title>
+    <meta charset="utf-8"> <!-- Important: rapi-doc uses utf8 charecters -->
+    <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+</head>
+<body>
+    <rapi-doc
+            spec-url = "/openapi.json"
+            render-style = "read"
+            show-header = "false"
+            sort-endpoints-by="method"
+            allow-authentication="false"
+    >
+        <div slot="nav-logo" style="display: flex; align-items: center; justify-content: center;">
+            <img src="https://raw.githubusercontent.com/python-discord/branding/main/logos/logo_circle/logo_circle.png" style="width:40px; margin-right: 20px; border-radius: 999px">
+            <span style="color:#fff">
+                <b>Python Discord</b></br>
+                Discord crasher detector
+            </span>
+          </div>
+    </rapi-doc>
+</body>
+</html>
