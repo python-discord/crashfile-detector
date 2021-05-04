@@ -90,6 +90,8 @@ async def detect_file(url: models.SuspectUrl) -> models.FileInfo:
 
         if w != frame_w or h != frame_h or fmt != frame_fmt:
             safe = False
+            proc.terminate()
+            break
 
     await proc.wait()
 
