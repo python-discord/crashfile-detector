@@ -80,7 +80,7 @@ async def detect_file(url: models.SuspectUrl) -> models.FileInfo:
 
     # Some links may 403 for ffprobe, but not aiohttp
     # Also deals with errors from ffprobe itself
-    if err := (await proc.stderr.read()).decode():
+    if err := (await proc.stderr.read()).decode().strip():
         raise HTTPException(status_code=400, detail=err)
 
     scanned_frames = 0
