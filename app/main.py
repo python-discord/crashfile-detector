@@ -48,7 +48,7 @@ def ping() -> models.Pong:
 
 @app.post("/detectfile", tags=["General Endpoints"], response_model=models.FileInfo)
 async def detect_file(url: models.SuspectUrl) -> models.FileInfo:
-    """Downloads and check if the file would crash Discord."""
+    """Stream the file to ffprobe to check if it would crash Discord."""
     async with app.state.http_session.get(url.url) as resp:
         try:
             length = int(resp.headers["Content-Length"])
