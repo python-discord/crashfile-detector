@@ -7,10 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./logs:/app/logs
-      - .:/app:ro
+      - ./app:/app/:ro
     tty: true
-    env_file:
-      - .env
     ports:
-      - "127.0.0.1:8000:80"
+      - "0.0.0.0:8000:8000"
