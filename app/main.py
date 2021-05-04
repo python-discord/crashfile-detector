@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 import aiohttp
-from aiohttp.web import HTTPError
+from aiohttp.client_exceptions import ClientError
 from fastapi import FastAPI, HTTPException
 from fastapi.templating import Jinja2Templates
 from starlette.responses import HTMLResponse
@@ -25,7 +25,7 @@ MAX_LENGTH = 10 * 1024 * 1024  # multiply by 1024 twice to get Bytes
 @app.on_event("startup")
 async def startup() -> None:
     """Create a aiohttp session and setup logging."""
-    app.state.http_session = aiohttp.ClientSession()
+    app.state.http_session = aiohttp.ClientSession(raise_for_status=True)
 
 
 @app.on_event("shutdown")
@@ -53,7 +53,7 @@ async def detect_file(url: models.SuspectUrl) -> models.FileInfo:
     try:
         async with app.state.http_session.get(url.url) as resp:
             headers = resp.headers
-    except HTTPError as e:
+    except ClientError as e:
         raise HTTPException(status_code=e.status, detail=models.ErrorMessages.REMOTE_SERVER_ERROR)
 
     try:
@@ -102,7 +102,8 @@ async def detect_file(url: models.SuspectUrl) -> models.FileInfo:
 
         if w != frame_w or h != frame_h or fmt != frame_fmt:
             safe = False
-            proc.terminate()
+            if proc.returncode is None:
+                proc.terminate()
             break
 
     await proc.wait()
