@@ -51,7 +51,7 @@ def ping() -> models.Pong:
 async def detect_file(url: models.SuspectUrl) -> models.FileInfo:
     """Stream the file to ffprobe to check if it would crash Discord."""
     try:
-        async with app.state.http_session.get(url.url) as resp:
+        async with app.state.http_session.head(url.url) as resp:
             headers = resp.headers
     except ClientError as e:
         raise HTTPException(status_code=e.status, detail=models.ErrorMessages.REMOTE_SERVER_ERROR)
