@@ -17,7 +17,7 @@ class ErrorMessages(t.NamedTuple):
     NON_INT_CONTENT_HEADER = "Remote server returned a non-integer Content-Length header."
     REMOTE_SERVER_ERROR = "Remote server returned a non-200 response code."
     CONTENT_TOO_BIG = "The remote file was too big to download."
-    INVALID_URL = "URL must be a valid url!"
+    INVALID_URL = "URL must be a valid URL!"
 
 
 class Pong(BaseModel):
@@ -33,7 +33,7 @@ class SuspectUrl(BaseModel):
 
     @validator("url")
     def url_must_be_valid_url(cls, url: str) -> str:
-        """Ensure that the url is a valid url."""
+        """Ensure that the URL is a valid URL."""
         result = urlparse(url)
         if not all([result.scheme in ALLOWED_SCHEMES, result.netloc, result.path]):
             raise HTTPException(status_code=413, detail=ErrorMessages.INVALID_URL)
